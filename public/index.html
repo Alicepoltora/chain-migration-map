@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#080b0f" />
+    <title>Current — Smart Money Migration Map</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='%23080b0f' stroke='%23a7f36b' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23a7f36b'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css?v=20260928-5" />
+  </head>
+  <body>
+    <div class="noise"></div>
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark"></span><strong>CURRENT</strong><span class="brand-sub">Smart Money Migration</span></div>
+      <div class="topbar-center"><span class="status-dot"></span><span id="updatedLabel">SYNCING NANSEN</span></div>
+      <div class="topbar-actions">
+        <button class="intel-button" id="intelButton">Intel lab</button>
+        <button class="method-button" id="methodButton">Methodology</button>
+        <span class="data-badge" id="dataBadge">LOADING</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="controls">
+        <section>
+          <div class="section-label">TIME WINDOW</div>
+            <div class="segmented" id="windowControl">
+            <button data-window="5m">5M</button>
+            <button class="active" data-window="1h">1H</button>
+            <button data-window="24h">24H</button>
+            <button data-window="7d">7D</button>
+            <button data-window="30d">30D</button>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-label">COHORT</div>
+          <button class="select-row">Smart Money <span>⌄</span></button>
+          <p class="helper">Historically profitable traders and labeled funds.</p>
+        </section>
+
+        <section>
+          <div class="section-label">FOCUS CHAIN</div>
+          <select class="chain-select" id="chainSelector" aria-label="Focus a blockchain">
+            <option value="">All blockchains</option>
+          </select>
+          <button class="clear-focus hidden" id="clearFocus">Reset flow focus</button>
+          <p class="helper" id="focusHelper">Click any chain icon to follow its outgoing cascade.</p>
+        </section>
+
+        <section>
+          <div class="section-label">MINIMUM FLOW</div>
+          <div class="range-value"><span id="minimumLabel">$1K</span><span>USD</span></div>
+          <input id="minimumRange" type="range" min="0.001" max="15" step="0.001" value="0.001" />
+        </section>
+
+        <section class="legend-section">
+          <div class="section-label">SIGNAL</div>
+          <div class="legend-row"><span class="legend-line strong"></span><span>High confidence</span></div>
+          <div class="legend-row"><span class="legend-line medium"></span><span>Inferred rotation</span></div>
+          <div class="legend-row"><span class="legend-node"></span><span>Net inflow</span></div>
+        </section>
+
+        <div class="nansen-credit">
+          <span>POWERED BY</span>
+          <strong>NANSEN</strong>
+          <small>Netflow · all Smart Money chains</small>
+        </div>
+      </aside>
+
+      <section class="map-stage" id="mapStage">
+        <div class="map-title">
+          <span>CAPITAL ROTATION</span>
+          <h1>Where smart money<br />is moving now.</h1>
+        </div>
+        <div class="map-metric">
+          <span>TOTAL INFERRED FLOW</span>
+          <strong id="totalFlow">—</strong>
+        </div>
+        <svg id="migrationMap" viewBox="0 0 980 680" role="img" aria-label="Interactive map of Smart Money capital migration between blockchains">
+          <defs>
+            <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur stdDeviation="5" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+            <radialGradient id="nodeFill"><stop offset="0%" stop-color="#20282d"/><stop offset="100%" stop-color="#0d1216"/></radialGradient>
+          </defs>
+          <g id="gridLayer"></g>
+          <g id="routeLayer"></g>
+          <g id="particleLayer"></g>
+          <g id="nodeLayer"></g>
+        </svg>
+        <div class="map-hint"><span>↗</span> Click a chain to trace its outgoing cascade · click an arrow for evidence</div>
+        <div class="loading-state" id="loadingState"><span></span><p>Reading cross-chain balances</p></div>
+      </section>
+
+      <aside class="inspector">
+        <div class="inspector-empty" id="inspectorEmpty">
+          <span class="eyebrow">ROUTE INSPECTOR</span>
+          <h2>Follow a current.</h2>
+          <p>Select an animated route to see the capital, assets and confidence behind the inferred migration.</p>
+        </div>
+        <div class="inspector-content hidden" id="inspectorContent">
+          <div class="inspector-head">
+            <span class="eyebrow">SELECTED ROUTE</span>
+            <span class="confidence" id="confidence">—</span>
+          </div>
+          <div class="route-heading"><span id="fromName">—</span><i>→</i><span id="toName">—</span></div>
+          <div class="route-value" id="routeValue">—</div>
+          <div class="balance-proof">
+            <div><span id="sourceName">SOURCE BALANCE</span><strong class="negative" id="sourceDelta">—</strong></div>
+            <div class="proof-line"><span></span><b>matched delta</b><span></span></div>
+            <div><span id="destinationName">DESTINATION BALANCE</span><strong class="positive" id="destinationDelta">—</strong></div>
+          </div>
+          <div class="inspector-section">
+            <span class="eyebrow">ASSET COMPOSITION</span>
+            <div id="assetList" class="asset-list"></div>
+          </div>
+          <div class="inspector-section meta-grid">
+            <div><span>WALLETS</span><strong id="walletCount">—</strong></div>
+            <div><span>EVIDENCE</span><strong id="bridgeEvidence">—</strong></div>
+            <div><span>7D CHANGE</span><strong id="routeChange">—</strong></div>
+            <div><span>METHOD</span><strong>NETFLOW Δ</strong></div>
+          </div>
+          <p class="caveat">Directional inference from Nansen Smart Money netflows. Not every route is a verified bridge transfer.</p>
+        </div>
+      </aside>
+
+      <section class="pulse-strip">
+        <div class="pulse-copy"><span class="eyebrow">MIGRATION PULSE</span><strong id="pulseLabel">Acceleration detected</strong></div>
+        <svg id="pulseChart" viewBox="0 0 700 72" preserveAspectRatio="none"></svg>
+        <div class="pulse-stats">
+          <div><span>ACTIVE WALLETS</span><strong id="activeWallets">—</strong></div>
+          <div><span>EMERGING</span><strong id="emergingChain">—</strong></div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="methodDialog">
+      <button id="closeDialog" aria-label="Close">×</button>
+      <span class="eyebrow">METHODOLOGY</span>
+      <h2>Balance movement, not bridge volume.</h2>
+          <p>CURRENT compares Smart Money netflow by token and chain. Negative flow on one network is matched to positive flow on another, then rendered as an inferred migration. The 5M view is a normalized live tick from Nansen's rolling 1H feed because Nansen does not expose a native five-minute aggregate.</p>
+      <div class="method-formula"><span>CHAIN A NETFLOW ↓</span><i>+</i><span>CHAIN B NETFLOW ↑</span><i>=</i><strong>ROTATION SIGNAL</strong></div>
+      <p class="dialog-note">Confidence rises when multiple assets and wallet cohorts support the same direction. Routes remain probabilistic unless transaction-level bridge evidence is available.</p>
+    </dialog>
+    <dialog id="intelDialog" class="intel-dialog">
+      <button id="closeIntel" aria-label="Close">×</button>
+      <div class="intel-dialog-head">
+        <div><span class="eyebrow">CURRENT / INTELLIGENCE LAYER</span><h2>From flow to action.</h2></div>
+        <span class="data-badge" id="intelStatus">READY</span>
+      </div>
+      <div class="intel-tabs" id="intelTabs">
+        <button class="active" data-tab="alpha">Token alpha</button>
+        <button data-tab="evidence">Evidence</button>
+        <button data-tab="cohorts">Cohorts</button>
+        <button data-tab="wallets">Wallets</button>
+        <button data-tab="chains">Chain radar</button>
+        <button data-tab="strategy">Strategy lab</button>
+      </div>
+      <section class="intel-panel" data-panel="alpha">
+        <div class="intel-panel-head"><div><span class="eyebrow">TOKEN ALPHA RADAR</span><h3>Which assets are pulling the route?</h3></div><span class="intel-fresh" id="intelFresh">—</span></div>
+        <div class="intel-grid" id="tokenAlphaGrid"></div>
+      </section>
+      <section class="intel-panel hidden" data-panel="evidence">
+        <div class="intel-panel-head"><div><span class="eyebrow">FLOW EVIDENCE</span><h3>Why this direction exists.</h3></div><span class="intel-score" id="intelConfidence">—</span></div>
+        <div class="evidence-list" id="evidenceList"></div>
+      </section>
+      <section class="intel-panel hidden" data-panel="cohorts">
+        <div class="intel-panel-head"><div><span class="eyebrow">COHORT LENS</span><h3>Who is agreeing with the move?</h3></div><span class="intel-fresh">NANSEN LABELS</span></div>
+        <div class="cohort-grid" id="cohortGrid"></div>
+      </section>
+      <section class="intel-panel hidden" data-panel="wallets">
+        <div class="intel-panel-head"><div><span class="eyebrow">WALLET LEADERBOARD</span><h3>Largest recent Smart Money trades.</h3></div><button class="deep-button" id="deepIntel">Load live DEX trades</button></div>
+        <div class="wallet-list" id="walletList"></div>
+      </section>
+      <section class="intel-panel hidden" data-panel="chains">
+        <div class="intel-panel-head"><div><span class="eyebrow">CHAIN OPPORTUNITY RADAR</span><h3>Where is capital concentrating?</h3></div><span class="intel-fresh">NETFLOW + MOMENTUM</span></div>
+        <div class="chain-radar" id="chainRadar"></div>
+      </section>
+      <section class="intel-panel hidden" data-panel="strategy">
+        <div class="intel-panel-head"><div><span class="eyebrow">STRATEGY LAB</span><h3>Replay this signal before copying it.</h3></div><span class="intel-fresh" id="strategyLookback">30D REPLAY</span></div>
+        <div class="strategy-grid" id="strategyGrid"></div>
+        <div class="brief-box"><span class="eyebrow">AI RESEARCH BRIEF</span><p id="briefText">—</p></div>
+        <div class="alert-list" id="alertList"></div>
+      </section>
+    </dialog>
+    <script type="module" src="/app.js?v=20260928-6"></script>
+  </body>
+</html>
